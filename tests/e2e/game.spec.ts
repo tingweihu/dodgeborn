@@ -1,0 +1,52 @@
+import { expect, test } from '@playwright/test';
+
+test('a player can enter a match, fire a special, pause and restart', async ({ page }) => {
+  await page.goto('/?test=1');
+  await expect(page.locator('body')).toHaveAttribute('data-screen', 'menu');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('body')).toHaveAttribute('data-screen', 'select');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('body')).toHaveAttribute('data-screen', 'match');
+  await page.keyboard.down('KeyD');
+  await page.evaluate(() => window.__DODGEBORN__!.advance(22));
+  await page.keyboard.up('KeyD');
+  await page.keyboard.down('KeyR');
+  await page.evaluate(() => window.__DODGEBORN__!.advance(1));
+  await page.keyboard.up('KeyR');
+  await page.evaluate(() => window.__DODGEBORN__!.advance(2));
+  await page.keyboard.down('KeyF');
+  await page.evaluate(() => window.__DODGEBORN__!.advance(1));
+  await page.keyboard.up('KeyF');
+  expect((await page.evaluate(() => window.__DODGEBORN__!.getState())).specialsThrown).toBeGreaterThan(0);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('body')).toHaveAttribute('data-screen', 'pause');
+  const stopped = await page.evaluate(() => window.__DODGEBORN__!.getState().tick);
+  await page.waitForTimeout(120);
+  expect(await page.evaluate(() => window.__DODGEBORN__!.getState().tick)).toBe(stopped);
+  const box = await page.locator('#game').boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height * 162 / 270);
+  await expect(page.locator('body')).toHaveAttribute('data-screen', 'match');
+  expect(await page.evaluate(() => window.__DODGEBORN__!.getState().tick)).toBeLessThan(4);
+});
+
+test('two local players have independent controls and AI can finish a full match', async ({ page }) => {
+  await page.goto('/?test=1');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('body')).toHaveAttribute('data-screen', 'match');
+  const before = await page.evaluate(() => window.__DODGEBORN__!.getState().control);
+  await page.keyboard.down('KeyD');
+  await page.keyboard.down('ArrowLeft');
+  await page.evaluate(() => window.__DODGEBORN__!.advance(16));
+  await page.keyboard.up('KeyD');
+  await page.keyboard.up('ArrowLeft');
+  const after = await page.evaluate(() => window.__DODGEBORN__!.getState().control);
+  expect(after[0]!.x).toBeGreaterThan(before[0]!.x);
+  expect(after[1]!.x).toBeLessThan(before[1]!.x);
+  await page.evaluate(() => { window.__DODGEBORN__!.start('solo', true); window.__DODGEBORN__!.advance(11_000); });
+  await expect(page.locator('body')).toHaveAttribute('data-screen', 'result');
+  expect((await page.evaluate(() => window.__DODGEBORN__!.getState())).finished).toBe(true);
+});

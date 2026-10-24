@@ -1,0 +1,11 @@
+{
+  "name": "@dodgeborn/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@dodgeborn/core": "0.1.0",
+    "@dodgeborn/content": "0.1.0",
+    "@dodgeborn/shared": "0.1.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@dodgeborn/content",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@dodgeborn/shared": "0.1.0"
+  }
+}

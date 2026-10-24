@@ -1,0 +1,25 @@
+node_modules/
+.npm-cache/
+dist/
+release/
+test-results/
+playwright-report/
+.vite/
+coverage/
+.cache/
+*.tsbuildinfo
+*.log
+
+# Local credentials and machine-specific configuration
+.env
+.env.*
+.npmrc
+.yarnrc
+.aws/
+.ssh/
+*.pem
+*.key
+*.p12
+*.pfx
+*credentials*
+*secret*
